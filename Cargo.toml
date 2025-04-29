@@ -27,8 +27,4 @@ wasm-bindgen-test = "0.3.34"
 
 [profile.release]
 # Tell `rustc` to optimize for small code size.
-lto = true         # Enables link-time optimization
-opt-level = "z"    # Optimize for size (rather than speed)
-strip = true       # Strip debug symbols (Rust 1.70+ only)
-codegen-units = 1  # Combine codegen units so the optimizer sees the entire program
-panic = "abort"    # Smaller code by removing panic 'unwinding'
+opt-level = "s"
