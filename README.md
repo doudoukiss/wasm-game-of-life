@@ -1,84 +1,70 @@
-<div align="center">
+# 生命演化数学实验室
 
-  <h1><code>wasm-pack-template</code></h1>
+这是一个面向 2026 年海淀区“海π”数学节“数学工程创意实践类”的互动小程序。项目用 Rust 实现康威生命游戏的核心演化规则，通过 WebAssembly 在浏览器中运行，并提供可视化棋盘、图形模板、实时统计和 CSV 数据导出。
 
-  <strong>A template for kick starting a Rust and WebAssembly project using <a href="https://github.com/rustwasm/wasm-pack">wasm-pack</a>.</strong>
+## 作品定位
 
-  <p>
-    <a href="https://travis-ci.org/rustwasm/wasm-pack-template"><img src="https://img.shields.io/travis/rustwasm/wasm-pack-template.svg?style=flat-square" alt="Build Status" /></a>
-  </p>
+- 作品类别：数学工程创意实践类
+- 作品形式：数学软件 / 互动小程序
+- 核心问题：简单局部规则如何产生稳定、周期、迁移和复杂演化现象
+- 数学内容：离散网格、邻域计数、比例统计、周期观察、数据记录与分析
 
-  <h3>
-    <a href="https://rustwasm.github.io/docs/wasm-pack/tutorials/npm-browser-packages/index.html">Tutorial</a>
-    <span> | </span>
-    <a href="https://discordapp.com/channels/442252698964721669/443151097398296587">Chat</a>
-  </h3>
+## 功能
 
-  <sub>Built with 🦀🕸 by <a href="https://rustwasm.github.io/">The Rust and WebAssembly Working Group</a></sub>
-</div>
+- 128 x 128 默认生命游戏宇宙，并支持 48、64、96、128 等演示尺寸
+- 内置稳定图形、振荡图形、滑翔机、轻型/中型/重型飞船、橡果和滑翔机发射器等典型图形
+- 提供稀疏种子、中等密度、拥挤开始、飞船家族、图形花园、长期变化等实验场景
+- 可设置随机种子和初始密度，保证实验可复现
+- 实时显示代数、活细胞数量、活细胞占比、出生数和死亡数
+- 绘制活细胞数量变化曲线
+- 用小学生能理解的中文实时解释当前画面是在稳定、重复、移动还是持续变化
+- 导出 CSV 数据，用于作品说明中的实验记录
 
-## About
+## 本地运行
 
-[**📚 Read this template tutorial! 📚**][template-docs]
+安装 Node.js、npm 和 Rust 后，在项目根目录运行：
 
-This template is designed for compiling Rust libraries into WebAssembly and
-publishing the resulting package to NPM.
-
-Be sure to check out [other `wasm-pack` tutorials online][tutorials] for other
-templates and usages of `wasm-pack`.
-
-[tutorials]: https://rustwasm.github.io/docs/wasm-pack/tutorials/index.html
-[template-docs]: https://rustwasm.github.io/docs/wasm-pack/tutorials/npm-browser-packages/index.html
-
-## 🚴 Usage
-
-### 🐑 Use `cargo generate` to Clone this Template
-
-[Learn more about `cargo generate` here.](https://github.com/ashleygwilliams/cargo-generate)
-
-```
-cargo generate --git https://github.com/rustwasm/wasm-pack-template.git --name my-project
-cd my-project
+```bash
+npm install
+npm run dev
 ```
 
-### 🛠️ Build with `wasm-pack build`
+`npm run dev` 会先执行 `npm run build:wasm`，把 Rust 编译为浏览器可加载的 WASM 包，然后启动 Vite 开发服务器。
 
-```
-wasm-pack build
-```
+如果本机没有可用的 `wasm-pack`，可以使用项目依赖提供的版本：
 
-### 🔬 Test in Headless Browsers with `wasm-pack test`
-
-```
-wasm-pack test --headless --firefox
+```bash
+npm install
 ```
 
-### 🎁 Publish to NPM with `wasm-pack publish`
+也可以手动安装：
 
+```bash
+cargo install wasm-pack
 ```
-wasm-pack publish
+
+## 构建
+
+```bash
+npm run build
+npm run preview
 ```
 
-## 🔋 Batteries Included
+生产构建输出在 `dist/`，WASM 中间产物输出在 `pkg/`。
 
-* [`wasm-bindgen`](https://github.com/rustwasm/wasm-bindgen) for communicating
-  between WebAssembly and JavaScript.
-* [`console_error_panic_hook`](https://github.com/rustwasm/console_error_panic_hook)
-  for logging panic messages to the developer console.
-* `LICENSE-APACHE` and `LICENSE-MIT`: most Rust projects are licensed this way, so these are included for you
+## 验证
 
-## License
+```bash
+cargo test
+cargo build --target wasm32-unknown-unknown
+npm run build
+```
 
-Licensed under either of
+## 提交材料
 
-* Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-* MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+比赛说明和提交清单放在：
 
-at your option.
+- `docs/submission/作品说明.md`
+- `docs/submission/提交清单.md`
 
-### Contribution
-
-Unless you explicitly state otherwise, any contribution intentionally
-submitted for inclusion in the work by you, as defined in the Apache-2.0
-license, shall be dual licensed as above, without any additional terms or
-conditions.
+官方通知要求的原创性与 AI 规范使用声明、成果汇总表需要使用主办方附件模板填写。本仓库没有这些官方附件模板，因此这里只提供准备清单，不伪造表格。
