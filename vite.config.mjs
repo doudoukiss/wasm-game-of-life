@@ -5,6 +5,7 @@ const projectRoot = fileURLToPath(new URL(".", import.meta.url));
 
 export default defineConfig({
   root: "www",
+  base: "./",
   publicDir: false,
   build: {
     outDir: "../dist",

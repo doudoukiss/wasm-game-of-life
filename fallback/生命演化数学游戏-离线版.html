@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>生命演化数学游戏 · 离线备用版</title>
+    <style>
+      :root {
+        --ink: #0f172a;
+        --text: #334155;
+        --muted: #64748b;
+        --line: #cbd5e1;
+        --page: #e9eef7;
+        --surface: #ffffff;
+        --primary: #26316f;
+        --accent: #f59e0b;
+        --accent-dark: #b45309;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 320px;
+        margin: 0;
+        color: var(--ink);
+        background: var(--page);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      button,
+      select,
+      input {
+        font: inherit;
+      }
+
+      button,
+      select {
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 0 12px;
+        color: var(--ink);
+        background: #ffffff;
+      }
+
+      button {
+        cursor: pointer;
+        font-weight: 800;
+      }
+
+      button:hover,
+      button.active {
+        border-color: var(--primary);
+        color: #ffffff;
+        background: var(--primary);
+      }
+
+      .app {
+        width: min(1280px, 100%);
+        margin: 0 auto;
+        padding: 18px;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.8rem, 4vw, 3rem);
+        line-height: 1.05;
+      }
+
+      .subtitle {
+        margin: 8px 0 0;
+        color: var(--primary);
+        font-weight: 900;
+      }
+
+      .rule-card {
+        border: 1px solid rgba(245, 158, 11, 0.42);
+        border-radius: 14px;
+        padding: 12px 14px;
+        background:
+          linear-gradient(135deg, rgba(255, 251, 235, 0.96), rgba(238, 242, 255, 0.76)),
+          #ffffff;
+        box-shadow: inset 4px 0 0 rgba(245, 158, 11, 0.8);
+      }
+
+      .rule-card span {
+        color: var(--accent-dark);
+        font-size: 0.78rem;
+        font-weight: 900;
+      }
+
+      .rule-card strong {
+        display: block;
+        margin: 4px 0;
+        font-size: 1.04rem;
+      }
+
+      .rule-card p {
+        margin: 0;
+        color: var(--text);
+        font-size: 0.92rem;
+        font-weight: 700;
+        line-height: 1.48;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+        gap: 14px;
+        align-items: start;
+      }
+
+      .stage,
+      .side-card,
+      .learn-card {
+        border: 1px solid rgba(38, 49, 111, 0.2);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+      }
+
+      .stage {
+        padding: 12px;
+      }
+
+      .step {
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 12px;
+        padding: 12px;
+        background: #fffbeb;
+        font-size: clamp(1rem, 1.6vw, 1.25rem);
+        font-weight: 950;
+      }
+
+      .toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+        gap: 10px;
+        margin: 10px 0;
+      }
+
+      .levels,
+      .tools,
+      .controls,
+      .metrics {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .levels button,
+      .tools button {
+        min-height: 42px;
+      }
+
+      .tools button {
+        min-width: 86px;
+      }
+
+      .control-box {
+        display: grid;
+        gap: 8px;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .metric {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px;
+        background: #ffffff;
+      }
+
+      .metric span {
+        display: block;
+        color: var(--muted);
+        font-size: 0.72rem;
+        font-weight: 800;
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 2px;
+        font-size: 1.1rem;
+      }
+
+      .board-wrap {
+        position: relative;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        aspect-ratio: 1;
+        border: 2px solid rgba(38, 49, 111, 0.22);
+        border-radius: 14px;
+        background: #f8fafc;
+        cursor: crosshair;
+      }
+
+      .coach {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        max-width: 310px;
+        border: 1px solid rgba(245, 158, 11, 0.45);
+        border-radius: 14px;
+        padding: 11px 12px;
+        background: rgba(255, 251, 235, 0.92);
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+        pointer-events: none;
+      }
+
+      .coach strong {
+        display: block;
+        font-size: 1rem;
+      }
+
+      .coach p {
+        margin: 4px 0 0;
+        color: var(--text);
+        font-size: 0.84rem;
+        font-weight: 720;
+        line-height: 1.35;
+      }
+
+      .task {
+        margin-top: 10px;
+        border-left: 4px solid var(--accent);
+        padding: 10px 12px;
+        color: var(--text);
+        background: #ffffff;
+        font-weight: 800;
+      }
+
+      .side-card {
+        display: grid;
+        gap: 12px;
+        padding: 12px;
+      }
+
+      .side-card h2,
+      .learn-card h2 {
+        margin: 0;
+        font-size: 1.15rem;
+      }
+
+      .narration {
+        display: grid;
+        gap: 8px;
+      }
+
+      .narration article {
+        border: 1px solid rgba(38, 49, 111, 0.14);
+        border-radius: 10px;
+        padding: 10px;
+        background: #ffffff;
+      }
+
+      .narration span {
+        color: var(--accent-dark);
+        font-size: 0.76rem;
+        font-weight: 900;
+      }
+
+      .narration p {
+        margin: 4px 0 0;
+        color: var(--text);
+        font-size: 0.92rem;
+        line-height: 1.5;
+      }
+
+      .formula {
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 10px;
+        padding: 10px;
+        color: var(--primary);
+        background: #fffbeb;
+        font-size: 1.05rem;
+        font-weight: 900;
+        text-align: center;
+      }
+
+      .chart {
+        width: 100%;
+        height: 120px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #ffffff;
+      }
+
+      .learn-card {
+        margin-top: 14px;
+        padding: 14px;
+      }
+
+      .learn-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .learn-grid article {
+        border: 1px solid rgba(38, 49, 111, 0.14);
+        border-radius: 10px;
+        padding: 10px;
+        background: #ffffff;
+      }
+
+      .mini {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: repeat(5, 1fr);
+        gap: 2px;
+        width: 70px;
+        height: 70px;
+        margin-bottom: 8px;
+      }
+
+      .mini i {
+        border-radius: 3px;
+        background: var(--primary);
+      }
+
+      .mini .accent {
+        background: var(--accent);
+      }
+
+      .learn-grid h3 {
+        margin: 0 0 5px;
+        font-size: 0.95rem;
+      }
+
+      .learn-grid p {
+        margin: 0;
+        color: var(--text);
+        font-size: 0.84rem;
+        line-height: 1.45;
+      }
+
+      @media (max-width: 900px) {
+        .topbar,
+        .layout,
+        .toolbar {
+          grid-template-columns: 1fr;
+        }
+
+        .learn-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 560px) {
+        .app {
+          padding: 12px;
+        }
+
+        .metrics,
+        .learn-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <h1>生命演化数学游戏</h1>
+          <p class="subtitle">离线备用版：无需网络、无需 WebAssembly，双击即可运行</p>
+        </div>
+        <aside class="rule-card">
+          <span>这是不是动画？</span>
+          <strong>不是视频，是每一帧都现场算出来。</strong>
+          <p>每个格子先数周围 8 格有几个亮邻居 n：0-1 太少会消失，2 可以留下，3 会出现新细胞，4-8 太挤会消失。</p>
+        </aside>
+      </header>
+
+      <section class="layout">
+        <section class="stage">
+          <div class="step">1 选道具 · 2 选关卡 · 3 点画布改变系统</div>
+
+          <div class="toolbar">
+            <div>
+              <div class="tools" aria-label="投放道具">
+                <button class="tool active" data-tool="block">障碍块</button>
+                <button class="tool" data-tool="glider">滑翔机</button>
+                <button class="tool" data-tool="blinker">节奏器</button>
+                <button class="tool" data-tool="cell">单格笔</button>
+              </div>
+              <div class="levels" aria-label="关卡">
+                <button class="level active" data-level="gun">发射器</button>
+                <button class="level" data-level="glider">滑翔机</button>
+                <button class="level" data-level="pulsar">脉冲星</button>
+                <button class="level" data-level="random">密度随机</button>
+                <button class="level" data-level="block">稳定小方块</button>
+              </div>
+            </div>
+
+            <div class="control-box">
+              <div class="controls">
+                <button id="play" class="active">暂停</button>
+                <button id="step">单步</button>
+                <button id="reset">重开</button>
+                <button id="clear">清空</button>
+                <button id="csv">导出 CSV</button>
+              </div>
+              <label>
+                速度
+                <input id="speed" type="range" min="1" max="30" value="14" />
+              </label>
+              <div class="metrics">
+                <div class="metric"><span>代数</span><strong id="generation">0</strong></div>
+                <div class="metric"><span>活细胞</span><strong id="alive">0</strong></div>
+                <div class="metric"><span>出现</span><strong id="births">0</strong></div>
+                <div class="metric"><span>消失</span><strong id="gone">0</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="board-wrap">
+            <canvas id="board" width="720" height="720"></canvas>
+            <div class="coach" id="coach">
+              <strong>点这里投放道具</strong>
+              <p>你的一次点击会改变当前图像，下一帧继续按同一条规则重新计算。</p>
+            </div>
+          </div>
+
+          <div class="task" id="task">当前任务：在发射器路径上放一个障碍块，观察碰撞和曲线变化。</div>
+        </section>
+
+        <aside class="side-card">
+          <h2>互动证明 / 数学旁白</h2>
+          <div class="narration">
+            <article>
+              <span>刚刚发生</span>
+              <p id="happened">发射器正在持续产生移动结构。点击棋盘会把道具加入当前图像。</p>
+            </article>
+            <article>
+              <span>规则分类讨论</span>
+              <p>先数 n：n=0 或 1 会消失，n=2 可以留下，n=3 会出现新细胞，n=4 到 8 太挤会消失。</p>
+            </article>
+            <article>
+              <span>为什么道具会改变后续画面</span>
+              <p id="why">道具会改变附近每个格子的 n。n 变了，下一代的出现、留下和消失位置就会跟着变。</p>
+            </article>
+            <article>
+              <span>接下来观察</span>
+              <p id="observe">看活细胞曲线是否突然上升、下降，或者进入新的周期。</p>
+            </article>
+          </div>
+          <div class="formula">X′t = Xt + P，下一帧 Xt+1 = T(X′t)</div>
+          <canvas id="chart" class="chart" width="360" height="120"></canvas>
+        </aside>
+      </section>
+
+      <section class="learn-card">
+        <h2>4 看懂演化：同一规则怎样长出不同图像</h2>
+        <div class="learn-grid">
+          <article>
+            <div class="mini"><i style="grid-area:2/2"></i><i style="grid-area:2/3"></i><i style="grid-area:3/2"></i><i style="grid-area:3/3"></i></div>
+            <h3>障碍块：固定点</h3>
+            <p>2 x 2 小方块每格都有合适邻居，继续计算也保持原样。</p>
+          </article>
+          <article>
+            <div class="mini"><i style="grid-area:3/2"></i><i class="accent" style="grid-area:3/3"></i><i style="grid-area:3/4"></i></div>
+            <h3>节奏器：周期</h3>
+            <p>三格会横竖来回切换，说明变化也可以很有规律。</p>
+          </article>
+          <article>
+            <div class="mini"><i style="grid-area:2/3"></i><i style="grid-area:3/4"></i><i class="accent" style="grid-area:4/2"></i><i style="grid-area:4/3"></i><i style="grid-area:4/4"></i></div>
+            <h3>滑翔机：移动</h3>
+            <p>代码没有写向前飞，整体移动是局部规则反复计算出来的。</p>
+          </article>
+          <article>
+            <div class="mini"><i class="accent" style="grid-area:3/3"></i></div>
+            <h3>单格笔：n=0</h3>
+            <p>孤立亮格下一代会消失，正好证明规则正在实时计算。</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const size = 80;
+      const canvas = document.querySelector("#board");
+      const chart = document.querySelector("#chart");
+      const ctx = canvas.getContext("2d");
+      const chartCtx = chart.getContext("2d");
+      const generationEl = document.querySelector("#generation");
+      const aliveEl = document.querySelector("#alive");
+      const birthsEl = document.querySelector("#births");
+      const goneEl = document.querySelector("#gone");
+      const happenedEl = document.querySelector("#happened");
+      const whyEl = document.querySelector("#why");
+      const observeEl = document.querySelector("#observe");
+      const taskEl = document.querySelector("#task");
+      const playButton = document.querySelector("#play");
+      const speedInput = document.querySelector("#speed");
+      const coach = document.querySelector("#coach");
+
+      let cells = new Set();
+      let baseline = new Set();
+      let generation = 0;
+      let births = 0;
+      let gone = 0;
+      let tool = "block";
+      let level = "gun";
+      let running = true;
+      let timer = null;
+      let history = [];
+
+      const key = (row, col) => `${row},${col}`;
+      const parse = (value) => value.split(",").map(Number);
+      const has = (set, row, col) => set.has(key(row, col));
+      const add = (set, row, col) => {
+        if (row >= 0 && row < size && col >= 0 && col < size) set.add(key(row, col));
+      };
+
+      const patterns = {
+        cell: [[0, 0]],
+        block: [[0, 0], [0, 1], [1, 0], [1, 1]],
+        blinker: [[0, -1], [0, 0], [0, 1]],
+        glider: [[-1, 0], [0, 1], [1, -1], [1, 0], [1, 1]],
+      };
+
+      const levelText = {
+        gun: {
+          task: "当前任务：在发射器路径上放一个障碍块，观察碰撞和曲线变化。",
+          happened: "发射器正在持续产生移动结构。点击棋盘会把道具加入当前图像。",
+          observe: "看移动结构碰到障碍块后，曲线是否出现明显波动。",
+        },
+        glider: {
+          task: "当前任务：给滑翔机前方投放节奏器或障碍块，观察路线变化。",
+          happened: "一个小图形正在整体移动，但每一格仍只按邻居数计算。",
+          observe: "看前缘出现、尾部消失如何形成移动效果。",
+        },
+        pulsar: {
+          task: "当前任务：在脉冲星旁投放滑翔机，观察周期是否被扰动。",
+          happened: "周期图形正在张开和收回。外来道具会改变局部 n。",
+          observe: "看周期结构是否恢复、碎裂，或进入新的变化。",
+        },
+        random: {
+          task: "当前任务：在随机图像里投放障碍块，观察稳定小岛能否留下。",
+          happened: "随机起点让局部邻居数分布不同，曲线会先快速变化。",
+          observe: "看稀疏、拥挤区域怎样被同一条规则重新整理。",
+        },
+        block: {
+          task: "当前任务：向稳定小方块旁投放滑翔机，观察固定点如何被扰动。",
+          happened: "稳定结构继续计算也不变。外来道具会改变它附近的 n。",
+          observe: "看原本稳定的图像是否发生碰撞、消失或恢复。",
+        },
+      };
+
+      function place(pattern, row, col, target = cells) {
+        for (const [dr, dc] of patterns[pattern] ?? patterns.block) add(target, row + dr, col + dc);
+      }
+
+      function placePulsar(row, col, target = cells) {
+        for (const x of [-4, -3, -2, 2, 3, 4]) {
+          for (const y of [-6, -1, 1, 6]) add(target, row + y, col + x);
+        }
+        for (const y of [-4, -3, -2, 2, 3, 4]) {
+          for (const x of [-6, -1, 1, 6]) add(target, row + y, col + x);
+        }
+      }
+
+      function placeGun(target = cells) {
+        const coords = [
+          [5, 1], [5, 2], [6, 1], [6, 2],
+          [5, 11], [6, 11], [7, 11], [4, 12], [8, 12], [3, 13], [9, 13],
+          [3, 14], [9, 14], [6, 15], [4, 16], [8, 16], [5, 17], [6, 17],
+          [7, 17], [6, 18], [3, 21], [4, 21], [5, 21], [3, 22], [4, 22],
+          [5, 22], [2, 23], [6, 23], [1, 25], [2, 25], [6, 25], [7, 25],
+          [3, 35], [4, 35], [3, 36], [4, 36],
+        ];
+        for (const [r, c] of coords) add(target, r + 12, c + 10);
+      }
+
+      function randomize(target = cells) {
+        for (let row = 0; row < size; row++) {
+          for (let col = 0; col < size; col++) {
+            if (Math.random() < 0.22) add(target, row, col);
+          }
+        }
+      }
+
+      function loadLevel(nextLevel) {
+        level = nextLevel;
+        cells = new Set();
+        generation = 0;
+        births = 0;
+        gone = 0;
+        history = [];
+
+        if (level === "gun") placeGun();
+        if (level === "glider") place("glider", 24, 24);
+        if (level === "pulsar") placePulsar(38, 38);
+        if (level === "random") randomize();
+        if (level === "block") place("block", 38, 38);
+
+        baseline = new Set(cells);
+        const info = levelText[level];
+        taskEl.textContent = info.task;
+        happenedEl.textContent = info.happened;
+        observeEl.textContent = info.observe;
+        whyEl.textContent = "不同关卡就是不同起点 X0。同一台规则机器 T 反复计算，结果可能稳定、周期、移动或长期变化。";
+        updateButtons();
+        render();
+      }
+
+      function countNeighbors(set, row, col) {
+        let count = 0;
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            if (dr === 0 && dc === 0) continue;
+            if (has(set, row + dr, col + dc)) count++;
+          }
+        }
+        return count;
+      }
+
+      function tick() {
+        const candidates = new Set();
+        for (const value of cells) {
+          const [row, col] = parse(value);
+          for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) add(candidates, row + dr, col + dc);
+          }
+        }
+
+        const next = new Set();
+        births = 0;
+        gone = 0;
+        for (const value of candidates) {
+          const [row, col] = parse(value);
+          const alive = has(cells, row, col);
+          const n = countNeighbors(cells, row, col);
+          const nextAlive = n === 3 || (alive && n === 2);
+          if (nextAlive) next.add(value);
+          if (!alive && nextAlive) births++;
+          if (alive && !nextAlive) gone++;
+        }
+        cells = next;
+        generation++;
+        render();
+      }
+
+      function render() {
+        const cellSize = canvas.width / size;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#f8fafc";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "rgba(38,49,111,0.08)";
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= size; i++) {
+          const p = i * cellSize;
+          ctx.beginPath();
+          ctx.moveTo(p, 0);
+          ctx.lineTo(p, canvas.height);
+          ctx.moveTo(0, p);
+          ctx.lineTo(canvas.width, p);
+          ctx.stroke();
+        }
+        ctx.fillStyle = "#26316f";
+        for (const value of cells) {
+          const [row, col] = parse(value);
+          ctx.fillRect(col * cellSize + 1, row * cellSize + 1, cellSize - 2, cellSize - 2);
+        }
+        generationEl.textContent = generation;
+        aliveEl.textContent = cells.size;
+        birthsEl.textContent = births;
+        goneEl.textContent = gone;
+        history.push(cells.size);
+        if (history.length > 140) history.shift();
+        renderChart();
+      }
+
+      function renderChart() {
+        chartCtx.clearRect(0, 0, chart.width, chart.height);
+        chartCtx.fillStyle = "#ffffff";
+        chartCtx.fillRect(0, 0, chart.width, chart.height);
+        chartCtx.strokeStyle = "#e2e8f0";
+        chartCtx.strokeRect(0, 0, chart.width, chart.height);
+        const max = Math.max(1, ...history);
+        chartCtx.beginPath();
+        chartCtx.strokeStyle = "#f59e0b";
+        chartCtx.lineWidth = 2;
+        history.forEach((value, index) => {
+          const x = (index / Math.max(1, history.length - 1)) * chart.width;
+          const y = chart.height - (value / max) * (chart.height - 12) - 6;
+          if (index === 0) chartCtx.moveTo(x, y);
+          else chartCtx.lineTo(x, y);
+        });
+        chartCtx.stroke();
+      }
+
+      function updateButtons() {
+        document.querySelectorAll(".tool").forEach((button) => button.classList.toggle("active", button.dataset.tool === tool));
+        document.querySelectorAll(".level").forEach((button) => button.classList.toggle("active", button.dataset.level === level));
+        playButton.textContent = running ? "暂停" : "开始";
+        playButton.classList.toggle("active", running);
+      }
+
+      function setLoop() {
+        clearInterval(timer);
+        if (running) timer = setInterval(tick, Math.max(35, 520 - Number(speedInput.value) * 15));
+      }
+
+      canvas.addEventListener("click", (event) => {
+        const rect = canvas.getBoundingClientRect();
+        const row = Math.floor(((event.clientY - rect.top) / rect.height) * size);
+        const col = Math.floor(((event.clientX - rect.left) / rect.width) * size);
+        if (tool === "cell") {
+          const k = key(row, col);
+          if (cells.has(k)) cells.delete(k);
+          else cells.add(k);
+        } else {
+          place(tool, row, col);
+        }
+        if (!running) baseline = new Set(cells);
+        coach.style.display = "none";
+        happenedEl.textContent = `你刚刚投放了“${document.querySelector(".tool.active").textContent}”，它已经成为当前图像的一部分。`;
+        whyEl.textContent = "这次点击改变了局部邻居数 n。下一帧会从 X′t 继续计算，所以后续曲线和图案可能改变。";
+        render();
+      });
+
+      document.querySelectorAll(".tool").forEach((button) => {
+        button.addEventListener("click", () => {
+          tool = button.dataset.tool;
+          updateButtons();
+        });
+      });
+
+      document.querySelectorAll(".level").forEach((button) => {
+        button.addEventListener("click", () => {
+          tool = button.dataset.level === "pulsar" ? "glider" : "block";
+          loadLevel(button.dataset.level);
+        });
+      });
+
+      playButton.addEventListener("click", () => {
+        running = !running;
+        updateButtons();
+        setLoop();
+      });
+
+      document.querySelector("#step").addEventListener("click", () => {
+        running = false;
+        updateButtons();
+        setLoop();
+        tick();
+      });
+
+      document.querySelector("#reset").addEventListener("click", () => {
+        cells = new Set(baseline);
+        generation = 0;
+        births = 0;
+        gone = 0;
+        history = [];
+        render();
+      });
+
+      document.querySelector("#clear").addEventListener("click", () => {
+        cells = new Set();
+        baseline = new Set();
+        generation = 0;
+        births = 0;
+        gone = 0;
+        history = [];
+        render();
+      });
+
+      document.querySelector("#csv").addEventListener("click", () => {
+        const rows = ["generation,alive_count", ...history.map((value, index) => `${index},${value}`)];
+        const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "life-data-fallback.csv";
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+
+      speedInput.addEventListener("input", setLoop);
+
+      loadLevel("gun");
+      setLoop();
+    </script>
+  </body>
+</html>
